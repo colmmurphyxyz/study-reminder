@@ -15,13 +15,16 @@ class MessageListener : ListenerAdapter() {
         if (e.message.author.id == pomoBotId) {
             if (e.message.contentRaw.contains("**Break** finished!")) {
                 inStudyMode = true
+                println("entered study mode")
             } else if (e.message.contentRaw.contains("**Study** finished!")) {
                 inStudyMode = false
+                println("entered break mode")
             }
             return
         }
         try {
-            if (e.member!!.roles.contains(studyRole) && e.message.category!!.id.equals(genCategoryId) && inStudyMode) {
+            if (e.member!!.roles.contains(studyRole) && e.message.category!!.id.equals(genCategoryId)
+                && inStudyMode && !listOf<Char>('!', ',', '?', '-').contains(e.message.contentRaw[0])) {
                 val quote : MotivationalQuote =
                     Klaxon().parse<MotivationalQuote>(
                         Bot.quoteBank[
@@ -33,6 +36,7 @@ class MessageListener : ListenerAdapter() {
                     "${e.author.asMention} get back to studying!")
                     .queue()
                 e.message.delete().queue()
+                println("deleted message: ${e.message.contentRaw}: from ${e.message.author.name}")
                 return
             }
         } catch (NPE: NullPointerException) { return }
