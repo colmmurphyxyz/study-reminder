@@ -1,0 +1,31 @@
+plugins {
+    id 'application'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+group 'xyz.colmmurphy.studyreminder'
+version '0.1.0'
+
+application {
+    mainClassName = 'StudyReminderKt'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    compile ('net.dv8tion:JDA:4.2.0_252') {
+        exclude module: 'opus-java'
+    }
+    implementation 'com.beust:klaxon:5.5'
+    implementation group: 'khttp', name: 'khttp', version: '1.0.0'
+}
