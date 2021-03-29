@@ -29,4 +29,4 @@ object Bot {
     }
 }
 
-private fun getToken(): String = File("token.txt").readText()
+private fun getToken(): String = File("token.txt").readLines()[0]
