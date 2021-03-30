@@ -1,4 +1,5 @@
 import com.beust.klaxon.Klaxon
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Guild
@@ -9,6 +10,7 @@ import javax.security.auth.login.LoginException
 
 object Bot {
     lateinit var jda : JDA
+    val waiter = EventWaiter()
     lateinit var LCGuild : Guild
     val quoteBank = ArrayList<JSONObject>()
     @Throws(LoginException::class, InterruptedException::class)
@@ -20,9 +22,11 @@ object Bot {
             GatewayIntent.GUILD_MESSAGE_REACTIONS,
             GatewayIntent.GUILD_MEMBERS,
             GatewayIntent.GUILD_PRESENCES
-        ).build().awaitReady()
+        )
+            .addEventListeners(waiter)
+            .build().awaitReady()
         LCGuild = jda.getGuildById("750706717796466779")!!
-        jda.addEventListener(MessageListener())
+        jda.addEventListener(MListener())
 
         val quotes = khttp.get("https://type.fit/api/quotes").jsonArray
         for (i in quotes) quoteBank.add(i as JSONObject)
