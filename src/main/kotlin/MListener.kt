@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.io.File
+import java.lang.NullPointerException
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 import kotlin.math.roundToInt
@@ -26,38 +27,49 @@ class MListener : ListenerAdapter() {
                 println("entered break mode")
             }
         }
-        val waiter = Bot.waiter
-        var delete = true
-        waiter.waitForEvent(GuildMessageReceivedEvent::class.java,
-            { ev ->
-                (ev.author.id == pomoBotId)
-            },
-            { _ ->
-                delete = false
-            },
-            5L, TimeUnit.SECONDS,
-            { ->                                                                // what to do when the EventWaiter times out
-                if (Math.random() < 0.2) {
-                    e.message.addReaction(":regional_indicator_s:").queue()
-                    e.message.addReaction(":regional_indicator_t:").queue()
-                    e.message.addReaction(":regional_indicator_u:").queue()
-                    e.message.addReaction(":regional_indicator_d:").queue()
-                    e.message.addReaction(":regional_indicator_y:").queue()
-                } else if (Math.random() < 0.1) {
-                    e.channel.sendFile(File("src/main/resources/${ceil(Math.random() * 9)}.gif"))
+        try {
+            if (e.member!!.roles.contains(studyRole) && inStudyMode
+                && e.message.category!!.id.equals(genCategoryId)
+            ) {
+                val waiter = Bot.waiter
+                var delete = true
+                waiter.waitForEvent(GuildMessageReceivedEvent::class.java,
+                    { ev ->
+                        (ev.author.id == pomoBotId)
+                    },
+                    { _ ->
+                        delete = false
+                    },
+                    5L, TimeUnit.SECONDS,
+                    { ->                                                                // what to do when the EventWaiter times out
+                        if (Math.random() < 0.2) {
+                            e.message.addReaction("U+1F1F8").queue()
+                            e.message.addReaction("U+1F1F9").queue()
+                            e.message.addReaction("U+1F1E7").queue()
+                            e.message.addReaction("U+1F1E9").queue()
+                            e.message.addReaction("U+1F1FE").queue()
+                        } else if (Math.random() < 0.1) {
+                            e.channel.sendFile(File("src/main/resources/${ceil(Math.random() * 9)}.gif"))
+                        }
+                    }
+                )
+                GlobalScope.launch {
+                    delay(5000L)
+                    if (delete && Math.random() < 0.4) {
+                        val quote = getQuote()
+                        e.message.delete().queue { msg ->
+                            e.channel.sendMessage(
+                                "> ${quote.text}\n" +
+                                        "- ${quote.author}\n" +
+                                        "${e.author.asMention} get back to studying!"
+                            )
+                                .queue()
+                        }
+                        println("deleted a message from ${e.author.name}: ${e.message.contentRaw}")
+                    }
                 }
             }
-        )
-        if (delete) {
-            val quote = getQuote()
-            e.message.delete().queue { msg ->
-                e.channel.sendMessage("> ${quote.text}\n" +
-                        "- ${quote.author}\n" +
-                        "${e.author.asMention} get back to studying!")
-                    .queue()
-            }
-            return
-        }
+        } catch (ignored : NullPointerException) { }
         if (e.message.contentRaw.startsWith("!quote")) {
             val quote = getQuote()
             e.channel.sendMessage("> ${quote.text}\n" +
@@ -73,10 +85,12 @@ class MListener : ListenerAdapter() {
             val nxt = iterator.next()
             if (nxt.author.id != pomoBotId) {
                 continue@findMode
-            } else if (nxt.contentRaw.contains("**Break** finished!")) {
-                return true
-            } else if (nxt.contentRaw.contains("**Study** finished!")) {
-                return false
+            } else {
+                if (nxt.contentRaw.contains("**Break** finished!")) {
+                    return true
+                } else if (nxt.contentRaw.contains("**Study** finished!")) {
+                    return false
+                }
             }
         }
         return true
