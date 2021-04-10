@@ -19,18 +19,17 @@ class MListener : ListenerAdapter() {
     var inStudyMode = inStudyMode()
     override fun onGuildMessageReceived(e : GuildMessageReceivedEvent) {
         if (e.message.author.id == pomoBotId) {
-            if (e.message.contentRaw.contains("**Break** finished!")) {
+            if (e.message.contentRaw.contains("Break** finished!")) {
                 inStudyMode = true
                 println("entered study mode")
-            } else if (e.message.contentRaw.contains("**Study** finished!")) {
+            } else if (e.message.contentRaw.contains("Study** finished!")) {
                 inStudyMode = false
                 println("entered break mode")
             }
         }
         try {
             if (e.member!!.roles.contains(studyRole) && inStudyMode
-                && e.message.category!!.id.equals(genCategoryId)
-            ) {
+                && e.message.category!!.id.equals(genCategoryId)) {
                 val waiter = Bot.waiter
                 var delete = true
                 waiter.waitForEvent(GuildMessageReceivedEvent::class.java,
@@ -41,31 +40,30 @@ class MListener : ListenerAdapter() {
                         delete = false
                     },
                     5L, TimeUnit.SECONDS,
-                    { ->                                                                // what to do when the EventWaiter times out
-                        if (Math.random() < 0.2) {
-                            e.message.addReaction("U+1F1F8").queue()
-                            e.message.addReaction("U+1F1F9").queue()
-                            e.message.addReaction("U+1F1E7").queue()
-                            e.message.addReaction("U+1F1E9").queue()
-                            e.message.addReaction("U+1F1FE").queue()
-                        } else if (Math.random() < 0.1) {
-                            e.channel.sendFile(File("src/main/resources/${ceil(Math.random() * 9)}.gif"))
-                        }
+                    { -> // what to do when the EventWaiter times out
                     }
                 )
                 GlobalScope.launch {
                     delay(5000L)
-                    if (delete && Math.random() < 0.4) {
+                    if (delete && Math.random() < 0.3) {
                         val quote = getQuote()
                         e.message.delete().queue { msg ->
                             e.channel.sendMessage(
                                 "> ${quote.text}\n" +
                                         "- ${quote.author}\n" +
                                         "${e.author.asMention} get back to studying!"
-                            )
-                                .queue()
+                            ).queue()
                         }
                         println("deleted a message from ${e.author.name}: ${e.message.contentRaw}")
+                    } else if (Math.random() < 0.15) {
+                            e.message.addReaction("U+1F1F8").queue()
+                            e.message.addReaction("U+1F1F9").queue()
+                            e.message.addReaction("U+1F1FA").queue()
+                            e.message.addReaction("U+1F1E9").queue()
+                            e.message.addReaction("U+1F1FE").queue()
+                    } else if (Math.random() < 0.2) {
+                        println("sending motivational gif")
+                        e.channel.sendFile(File("${ceil(Math.random() * 9)}.gif"))
                     }
                 }
             }
@@ -86,9 +84,9 @@ class MListener : ListenerAdapter() {
             if (nxt.author.id != pomoBotId) {
                 continue@findMode
             } else {
-                if (nxt.contentRaw.contains("**Break** finished!")) {
+                if (nxt.contentRaw.contains("Break** finished!")) {
                     return true
-                } else if (nxt.contentRaw.contains("**Study** finished!")) {
+                } else if (nxt.contentRaw.contains("Study** finished!")) {
                     return false
                 }
             }
