@@ -63,7 +63,7 @@ class MListener : ListenerAdapter() {
                             e.message.addReaction("U+1F1FE").queue()
                     } else if (Math.random() < 0.2) {
                         println("sending motivational gif")
-                        e.channel.sendFile(File("${ceil(Math.random() * 9)}.gif"))
+                        e.channel.sendFile(File("src/main/resources/${(Math.random() * 9).toInt() + 1}.gif")).queue()
                     }
                 }
             }
@@ -72,6 +72,12 @@ class MListener : ListenerAdapter() {
             val quote = getQuote()
             e.channel.sendMessage("> ${quote.text}\n" +
                     "- ${quote.author}\n"
+            ).queue()
+        } else if (e.message.contentRaw.startsWith("!gif")) {
+            println("sending motivational gif!")
+            println((Math.random() * 9).toInt() + 1)
+            e.channel.sendFile(
+                File("src/main/resources/${(Math.random() * 9).toInt() + 1}.gif")
             ).queue()
         }
     }
